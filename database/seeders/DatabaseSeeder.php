@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
                 MasterDataSeeder::class,
                 FinanceSeeder::class,
                 ApprovalRuleSeeder::class,
+                CatalogSeeder::class,
+                DemoTransactionSeeder::class,
             ]);
         });
     }
