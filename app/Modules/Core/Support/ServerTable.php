@@ -72,12 +72,12 @@ class ServerTable
 
     public function make(Request $request): array
     {
-        $total = (clone $this->query)->toBase()->getCountForPagination();
+        $total = $this->countRows();
 
         $this->applyFilters($request);
         $this->applySearch($request);
 
-        $filtered = (clone $this->query)->toBase()->getCountForPagination();
+        $filtered = $this->countRows();
 
         $this->applyOrder($request);
 
@@ -98,6 +98,17 @@ class ServerTable
             'recordsFiltered' => $filtered,
             'data' => $data,
         ];
+    }
+
+    /**
+     * Query builder mentah (mis. hasil fromSub) tidak punya toBase(), jadi
+     * penghitungan total harus mengenali kedua jenis builder.
+     */
+    private function countRows(): int
+    {
+        $query = clone $this->query;
+
+        return ($query instanceof EloquentBuilder ? $query->toBase() : $query)->getCountForPagination();
     }
 
     private function applyFilters(Request $request): void

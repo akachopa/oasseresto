@@ -25,22 +25,38 @@ class ReorderService
     public function suggestions(?int $warehouseId = null, ?int $branchId = null): Collection
     {
         return collect(
-            DB::query()
-                ->fromSub($this->projection($warehouseId, $branchId), 'suggestion')
-                ->whereColumn('projected_quantity', '<=', 'reorder_point')
+            $this->query($warehouseId, $branchId)
                 ->orderByRaw('projected_quantity - reorder_point')
                 ->get()
-        )->map(function (object $row): object {
-            $target = max((float) $row->maximum_stock, (float) $row->reorder_point * 2);
-            $available = (float) $row->projected_quantity;
+        )->map(fn (object $row) => $this->decorate($row));
+    }
 
-            $row->available = $available;
-            $row->suggested_quantity = round(max($target - $available, (float) $row->reorder_point), 4);
-            $row->estimated_cost = round($row->suggested_quantity * (float) $row->last_purchase_cost, 4);
-            $row->is_critical = $available <= (float) $row->minimum_stock;
+    /**
+     * Dipakai controller untuk DataTables server-side, sehingga daftar
+     * rekomendasi memakai paging dan pencarian yang sama dengan tabel lain.
+     */
+    public function query(?int $warehouseId = null, ?int $branchId = null): Builder
+    {
+        return DB::query()
+            ->fromSub($this->projection($warehouseId, $branchId), 'suggestion')
+            ->whereColumn('projected_quantity', '<=', 'reorder_point');
+    }
 
-            return $row;
-        });
+    /**
+     * Kuantitas usulan mengejar stok maksimum; bila maksimum belum diisi,
+     * titik reorder dipakai sebagai target minimal supaya tetap ada usulan.
+     */
+    public function decorate(object $row): object
+    {
+        $target = max((float) $row->maximum_stock, (float) $row->reorder_point * 2);
+        $available = (float) $row->projected_quantity;
+
+        $row->available = $available;
+        $row->suggested_quantity = round(max($target - $available, (float) $row->reorder_point), 4);
+        $row->estimated_cost = round($row->suggested_quantity * (float) $row->last_purchase_cost, 4);
+        $row->is_critical = $available <= (float) $row->minimum_stock;
+
+        return $row;
     }
 
     /**
@@ -92,6 +108,7 @@ class ReorderService
                 'products.company_id',
                 'products.sku',
                 'products.name',
+                'products.base_unit_id',
                 'products.reorder_point',
                 'products.minimum_stock',
                 'products.maximum_stock',
