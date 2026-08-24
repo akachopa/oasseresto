@@ -78,7 +78,7 @@ class Delivery extends BaseModel
      */
     public function scopeOpen(Builder $query): Builder
     {
-        return $query->whereIn('status', [
+        return $query->whereIn($query->qualifyColumn('status'), [
             DeliveryStatus::Ready,
             DeliveryStatus::Picking,
             DeliveryStatus::Packed,
