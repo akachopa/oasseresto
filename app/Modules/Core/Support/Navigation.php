@@ -163,6 +163,7 @@ class Navigation
                     ['label' => 'Kategori', 'route' => 'product-categories.index', 'permission' => 'product.view'],
                     ['label' => 'Brand', 'route' => 'brands.index', 'permission' => 'product.view'],
                     ['label' => 'Satuan', 'route' => 'units.index', 'permission' => 'product.view'],
+                    ['label' => 'Level Harga', 'route' => 'price-levels.index', 'permission' => 'product.price.manage'],
                     ['label' => 'Aturan Harga', 'route' => 'price-rules.index', 'permission' => 'product.price.manage'],
                     ['label' => 'Stok', 'route' => 'inventory.stock.index', 'permission' => 'inventory.view'],
                     ['label' => 'Kartu Stok', 'route' => 'inventory.ledger.index', 'permission' => 'inventory.view'],

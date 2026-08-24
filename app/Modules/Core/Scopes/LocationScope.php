@@ -17,7 +17,11 @@ class LocationScope
 {
     public function __construct(private readonly ScopeManager $manager) {}
 
-    public function applyBranch(Builder $query, string $column = 'branch_id'): Builder
+    /**
+     * Master data seperti customer boleh tidak terikat cabang, sehingga
+     * baris ber-branch null tetap ikut terlihat bila $includeNull aktif.
+     */
+    public function applyBranch(Builder $query, string $column = 'branch_id', bool $includeNull = false): Builder
     {
         $branchIds = $this->manager->branchIds();
 
@@ -25,7 +29,15 @@ class LocationScope
             return $query;
         }
 
-        return $query->whereIn($query->qualifyColumn($column), $branchIds);
+        $qualified = $query->qualifyColumn($column);
+
+        return $query->where(function (Builder $builder) use ($qualified, $branchIds, $includeNull): void {
+            $builder->whereIn($qualified, $branchIds);
+
+            if ($includeNull) {
+                $builder->orWhereNull($qualified);
+            }
+        });
     }
 
     public function applyWarehouse(Builder $query, string $column = 'warehouse_id'): Builder

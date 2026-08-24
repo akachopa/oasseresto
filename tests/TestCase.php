@@ -13,6 +13,7 @@ use App\Modules\Core\Enums\ScopeLevel;
 use App\Modules\Core\Services\ScopeManager;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\CompanySeeder;
+use Database\Seeders\MasterDataSeeder;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Hash;
@@ -37,6 +38,7 @@ abstract class TestCase extends BaseTestCase
             $this->seed(CompanySeeder::class);
             $this->seed(RolePermissionSeeder::class);
             $this->seed(AccountSeeder::class);
+            $this->seed(MasterDataSeeder::class);
         });
 
         $company = Company::withoutGlobalScopes()->where('code', 'SGB')->firstOrFail();

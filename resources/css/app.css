@@ -179,6 +179,11 @@
     .field-error {
         @apply text-negative mt-1.5 text-xs;
     }
+
+    /* Tabel lebar tetap bisa digeser di layar kecil tanpa memecah layout. */
+    .oasse-table-wrap {
+        @apply -mx-px overflow-x-auto;
+    }
 }
 
 /* Penyesuaian DataTables agar menyatu dengan tema OASSE */
