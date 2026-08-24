@@ -27,4 +27,13 @@ enum AlertSeverity: string
             self::Info => 'Informasi',
         };
     }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::Critical => 'danger',
+            self::Warning => 'warning',
+            self::Info => 'info',
+        };
+    }
 }

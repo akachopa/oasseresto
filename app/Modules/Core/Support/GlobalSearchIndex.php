@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Support;
 
+use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Asset\Models\FixedAsset;
 use App\Modules\Customer\Models\Customer;
+use App\Modules\Finance\Models\Payment;
+use App\Modules\Finance\Models\Receipt;
 use App\Modules\Product\Models\Product;
+use App\Modules\Purchase\Models\GoodsReceipt;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Sales\Models\SalesInvoice;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Supplier\Models\Supplier;
+use BackedEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -45,10 +50,10 @@ class GlobalSearchIndex
                 ->limit(5)
                 ->get()
                 ->map(fn ($model) => [
-                    'title' => (string) $model->{$source['title']},
-                    'subtitle' => (string) ($source['subtitle'] ? $model->{$source['subtitle']} : ''),
+                    'title' => $this->stringify($model->{$source['title']}),
+                    'subtitle' => $source['subtitle'] ? $this->stringify($model->{$source['subtitle']}) : '',
                     'url' => $source['route'] && Route::has($source['route'])
-                        ? route($source['route'], $model->getKey())
+                        ? route($source['route'], $model)
                         : null,
                 ])
                 ->all();
@@ -122,6 +127,42 @@ class GlobalSearchIndex
                 'route' => 'purchase.orders.detail',
             ],
             [
+                'label' => 'Penerimaan Barang',
+                'model' => GoodsReceipt::class,
+                'permission' => 'inventory.receive',
+                'columns' => ['number'],
+                'title' => 'number',
+                'subtitle' => 'status',
+                'route' => 'purchase.receipts.detail',
+            ],
+            [
+                'label' => 'Penerimaan Kas',
+                'model' => Receipt::class,
+                'permission' => 'finance.receivable.collect',
+                'columns' => ['number', 'reference'],
+                'title' => 'number',
+                'subtitle' => 'status',
+                'route' => 'finance.receipts.detail',
+            ],
+            [
+                'label' => 'Pembayaran',
+                'model' => Payment::class,
+                'permission' => 'finance.payable.pay',
+                'columns' => ['number', 'reference'],
+                'title' => 'number',
+                'subtitle' => 'status',
+                'route' => 'finance.payments.detail',
+            ],
+            [
+                'label' => 'Jurnal',
+                'model' => JournalEntry::class,
+                'permission' => 'accounting.journal.view',
+                'columns' => ['number', 'description'],
+                'title' => 'number',
+                'subtitle' => 'description',
+                'route' => 'accounting.journals.detail',
+            ],
+            [
                 'label' => 'Aset Tetap',
                 'model' => FixedAsset::class,
                 'permission' => 'asset.view',
@@ -131,5 +172,14 @@ class GlobalSearchIndex
                 'route' => null,
             ],
         ];
+    }
+
+    private function stringify(mixed $value): string
+    {
+        if ($value instanceof BackedEnum) {
+            return method_exists($value, 'label') ? $value->label() : (string) $value->value;
+        }
+
+        return (string) $value;
     }
 }
