@@ -10,6 +10,7 @@ use App\Modules\Company\Models\Branch;
 use App\Modules\Core\Concerns\BelongsToCompany;
 use App\Modules\Core\Enums\ApprovalStatus;
 use App\Modules\Core\Models\BaseModel;
+use App\Modules\Finance\Models\Expense;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Purchase\Models\PurchaseRequest;
 use App\Modules\Sales\Models\SalesOrder;
@@ -32,6 +33,7 @@ class ApprovalRequest extends BaseModel
         'purchase_request' => PurchaseRequest::class,
         'purchase_order' => PurchaseOrder::class,
         'sales_order' => SalesOrder::class,
+        'expense' => Expense::class,
     ];
 
     protected function casts(): array

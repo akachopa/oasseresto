@@ -42,6 +42,15 @@ return [
     'credit' => [
         'mode' => env('OASSE_CREDIT_LIMIT_MODE', 'approval'),
         'aging_buckets' => [30, 60, 90],
+
+        /*
+         * Diskon pelunasan dini: persen potongan bila tagihan dibayar dalam
+         * tenggang hari sejak tanggal invoice dan belum jatuh tempo.
+         */
+        'early_payment' => [
+            'percent' => (float) env('OASSE_EARLY_PAYMENT_PERCENT', 2),
+            'within_days' => (int) env('OASSE_EARLY_PAYMENT_DAYS', 10),
+        ],
     ],
 
     /*
