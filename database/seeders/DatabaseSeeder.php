@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
                 UserSeeder::class,
                 AccountSeeder::class,
                 MasterDataSeeder::class,
+                ApprovalRuleSeeder::class,
             ]);
         });
     }
