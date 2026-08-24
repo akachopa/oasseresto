@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Finance\Services;
 
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Core\Enums\DocumentStatus;
 use App\Modules\Core\Services\DocumentNumberService;
 use App\Modules\Core\Services\ScopeManager;
@@ -99,7 +100,10 @@ class PaymentService
             $payment->posted_at = now();
             $payment->save();
 
-            return $payment->refresh();
+            $payment = $payment->refresh();
+            event(new BusinessDocumentPosted('payment', $payment));
+
+            return $payment;
         });
     }
 
@@ -111,6 +115,7 @@ class PaymentService
             }
 
             if ($payment->isPosted()) {
+                event(new BusinessDocumentPosted('payment', $payment, 'reverse'));
                 $this->cash->reverseDocument('payment', (int) $payment->getKey(), 'Pembatalan '.$payment->number);
             }
 

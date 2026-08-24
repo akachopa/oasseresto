@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Sales\Services;
 
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Core\Enums\DocumentStatus;
 use App\Modules\Core\Enums\PaymentTermType;
 use App\Modules\Core\Models\TaxCode;
@@ -144,7 +145,10 @@ class SalesInvoiceService
 
             $this->refreshCustomerProfile($invoice);
 
-            return $invoice->refresh();
+            $invoice = $invoice->refresh();
+            event(new BusinessDocumentPosted('sales_invoice', $invoice));
+
+            return $invoice;
         });
     }
 

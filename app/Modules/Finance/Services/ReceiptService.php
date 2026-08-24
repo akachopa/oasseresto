@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Finance\Services;
 
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Core\Enums\DocumentStatus;
 use App\Modules\Core\Services\DocumentNumberService;
 use App\Modules\Core\Services\ScopeManager;
@@ -101,7 +102,10 @@ class ReceiptService
             $receipt->posted_at = now();
             $receipt->save();
 
-            return $receipt->refresh();
+            $receipt = $receipt->refresh();
+            event(new BusinessDocumentPosted('receipt', $receipt));
+
+            return $receipt;
         });
     }
 
@@ -117,6 +121,7 @@ class ReceiptService
             }
 
             if ($receipt->isPosted()) {
+                event(new BusinessDocumentPosted('receipt', $receipt, 'reverse'));
                 $this->cash->reverseDocument('receipt', (int) $receipt->getKey(), 'Pembatalan '.$receipt->number);
             }
 

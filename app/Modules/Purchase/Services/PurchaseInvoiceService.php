@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Purchase\Services;
 
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Core\Enums\DocumentStatus;
 use App\Modules\Core\Enums\PayableStatus;
 use App\Modules\Core\Enums\PaymentTermType;
@@ -132,7 +133,10 @@ class PurchaseInvoiceService
             $this->createPayable($invoice);
             $this->performance->refresh((int) $invoice->supplier_id);
 
-            return $invoice->refresh();
+            $invoice = $invoice->refresh();
+            event(new BusinessDocumentPosted('purchase_invoice', $invoice));
+
+            return $invoice;
         });
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Purchase\Services;
 
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Company\Models\Warehouse;
 use App\Modules\Core\Enums\DocumentStatus;
 use App\Modules\Core\Enums\InventoryTransactionType;
@@ -127,7 +128,10 @@ class PurchaseReturnService
 
             $this->performance->refresh((int) $return->supplier_id);
 
-            return $return->refresh();
+            $return = $return->refresh();
+            event(new BusinessDocumentPosted('purchase_return', $return));
+
+            return $return;
         });
     }
 

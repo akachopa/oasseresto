@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Finance\Services;
 
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Approval\Models\ApprovalRequest;
 use App\Modules\Approval\Services\ApprovalService;
 use App\Modules\Core\Enums\DocumentStatus;
@@ -174,7 +175,10 @@ class ExpenseService
             $expense->posted_at = now();
             $expense->save();
 
-            return $expense->refresh();
+            $expense = $expense->refresh();
+            event(new BusinessDocumentPosted('expense', $expense));
+
+            return $expense;
         });
     }
 
@@ -182,6 +186,7 @@ class ExpenseService
     {
         return DB::transaction(function () use ($expense): Expense {
             if ($expense->isPosted()) {
+                event(new BusinessDocumentPosted('expense', $expense, 'reverse'));
                 $this->cash->reverseDocument('expense', (int) $expense->getKey(), 'Pembatalan '.$expense->number);
             }
 

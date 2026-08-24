@@ -25,4 +25,13 @@ enum AccountingPeriodStatus: string
             self::Reopened => 'Dibuka Kembali',
         };
     }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::Open, self::Reopened => 'success',
+            self::Closing => 'warning',
+            self::Closed => 'muted',
+        };
+    }
 }

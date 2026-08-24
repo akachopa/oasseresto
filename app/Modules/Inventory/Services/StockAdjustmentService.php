@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Inventory\Services;
 
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Company\Models\Warehouse;
 use App\Modules\Core\Enums\DocumentStatus;
 use App\Modules\Core\Enums\InventoryTransactionType;
@@ -112,6 +113,8 @@ class StockAdjustmentService
             $adjustment->posted_by = Auth::id();
             $adjustment->posted_at = now();
             $adjustment->save();
+
+            event(new BusinessDocumentPosted('stock_adjustment', $adjustment->fresh()));
 
             return $adjustment;
         });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Inventory\Services;
 
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Company\Models\Warehouse;
 use App\Modules\Core\Enums\DocumentStatus;
 use App\Modules\Core\Enums\InventoryTransactionType;
@@ -201,6 +202,8 @@ class StockOpnameService
             $opname->posted_by = Auth::id();
             $opname->posted_at = now();
             $opname->save();
+
+            event(new BusinessDocumentPosted('stock_opname', $opname->fresh()));
 
             return $opname;
         });

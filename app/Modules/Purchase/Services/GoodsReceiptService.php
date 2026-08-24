@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Purchase\Services;
 
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Company\Models\Warehouse;
 use App\Modules\Core\Enums\DocumentStatus;
 use App\Modules\Core\Enums\InventoryTransactionType;
@@ -174,7 +175,10 @@ class GoodsReceiptService
 
             $this->performance->refresh($receipt->supplier_id);
 
-            return $receipt->refresh();
+            $receipt = $receipt->refresh();
+            event(new BusinessDocumentPosted('goods_receipt', $receipt));
+
+            return $receipt;
         });
     }
 

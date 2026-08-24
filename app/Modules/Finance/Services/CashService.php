@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Finance\Services;
 
+use App\Modules\Accounting\DTO\CashTransferPayload;
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Finance\Models\CashAccount;
 use App\Modules\Finance\Models\CashTransaction;
 use Illuminate\Support\Carbon;
@@ -52,7 +54,7 @@ class CashService
             $locked->balance = $balance;
             $locked->save();
 
-            return CashTransaction::create([
+            $txn = CashTransaction::create([
                 'company_id' => $locked->company_id,
                 'branch_id' => $locked->branch_id,
                 'cash_account_id' => $locked->getKey(),
@@ -67,6 +69,12 @@ class CashService
                 'description' => $description,
                 'created_by' => Auth::id(),
             ]);
+
+            if ($category === 'opening') {
+                event(new BusinessDocumentPosted('cash_opening', $txn));
+            }
+
+            return $txn;
         });
     }
 
@@ -111,10 +119,17 @@ class CashService
             throw new RuntimeException('Akun tujuan harus berbeda dari akun asal.');
         }
 
-        return DB::transaction(fn (): array => [
-            $this->record($from, 'out', $amount, 'transfer_out', $note ?? 'Transfer ke '.$to->name, date: $date),
-            $this->record($to, 'in', $amount, 'transfer_in', $note ?? 'Transfer dari '.$from->name, date: $date),
-        ]);
+        return DB::transaction(function () use ($from, $to, $amount, $note, $date): array {
+            $out = $this->record($from, 'out', $amount, 'transfer_out', $note ?? 'Transfer ke '.$to->name, date: $date);
+            $in = $this->record($to, 'in', $amount, 'transfer_in', $note ?? 'Transfer dari '.$from->name, date: $date);
+
+            event(new BusinessDocumentPosted(
+                'cash_transfer',
+                new CashTransferPayload($from, $to, $out, $in, $amount),
+            ));
+
+            return [$out, $in];
+        });
     }
 
     /**

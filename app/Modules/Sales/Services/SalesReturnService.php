@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Sales\Services;
 
+use App\Modules\Accounting\Events\BusinessDocumentPosted;
 use App\Modules\Company\Models\Warehouse;
 use App\Modules\Core\Enums\DocumentStatus;
 use App\Modules\Core\Enums\InventoryTransactionType;
@@ -168,7 +169,10 @@ class SalesReturnService
                 $this->credit->refreshCustomer($return->customer);
             }
 
-            return $return->refresh();
+            $return = $return->refresh();
+            event(new BusinessDocumentPosted('sales_return', $return));
+
+            return $return;
         });
     }
 

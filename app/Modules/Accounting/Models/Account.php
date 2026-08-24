@@ -49,4 +49,13 @@ class Account extends BaseModel
     {
         return "{$this->code} - {$this->name}";
     }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Account $account): void {
+            if ($account->slug === '') {
+                $account->slug = null;
+            }
+        });
+    }
 }
