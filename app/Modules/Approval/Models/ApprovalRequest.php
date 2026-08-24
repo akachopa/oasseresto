@@ -12,6 +12,7 @@ use App\Modules\Core\Enums\ApprovalStatus;
 use App\Modules\Core\Models\BaseModel;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Purchase\Models\PurchaseRequest;
+use App\Modules\Sales\Models\SalesOrder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,6 +31,7 @@ class ApprovalRequest extends BaseModel
     public const DOCUMENTS = [
         'purchase_request' => PurchaseRequest::class,
         'purchase_order' => PurchaseOrder::class,
+        'sales_order' => SalesOrder::class,
     ];
 
     protected function casts(): array

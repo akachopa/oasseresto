@@ -41,7 +41,8 @@
         },
         "files": [
             "tests/Helpers/inventory.php",
-            "tests/Helpers/purchase.php"
+            "tests/Helpers/purchase.php",
+            "tests/Helpers/sales.php"
         ]
     },
     "scripts": {

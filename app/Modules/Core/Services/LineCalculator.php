@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Purchase\Services;
+namespace App\Modules\Core\Services;
 
 use App\Modules\Core\Models\TaxCode;
 

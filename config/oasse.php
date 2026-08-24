@@ -86,6 +86,7 @@ return [
             'fixed_asset' => 'FA',
             'payroll' => 'PYR',
             'pos_sale' => 'POS',
+            'cashier_shift' => 'SHF',
         ],
     ],
 
