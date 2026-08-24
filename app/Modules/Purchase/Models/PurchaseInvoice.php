@@ -1,0 +1,78 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Purchase\Models;
+
+use App\Models\User;
+use App\Modules\Company\Models\Branch;
+use App\Modules\Core\Concerns\BelongsToCompany;
+use App\Modules\Core\Enums\DocumentStatus;
+use App\Modules\Core\Enums\PaymentTermType;
+use App\Modules\Core\Models\BaseModel;
+use App\Modules\Supplier\Models\Supplier;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class PurchaseInvoice extends BaseModel
+{
+    use BelongsToCompany;
+
+    protected function casts(): array
+    {
+        return [
+            'status' => DocumentStatus::class,
+            'payment_term' => PaymentTermType::class,
+            'invoice_date' => 'date',
+            'due_date' => 'date',
+            'subtotal' => 'float',
+            'discount_amount' => 'float',
+            'tax_amount' => 'float',
+            'other_cost' => 'float',
+            'total' => 'float',
+            'paid_amount' => 'float',
+            'outstanding_amount' => 'float',
+            'posted_at' => 'datetime',
+        ];
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(PurchaseInvoiceItem::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id');
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function isPosted(): bool
+    {
+        return $this->status === DocumentStatus::Posted;
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->outstanding_amount > 0 && $this->due_date->isPast();
+    }
+
+    public function daysOverdue(): int
+    {
+        return $this->isOverdue() ? $this->due_date->diffInDays(now()) : 0;
+    }
+}
