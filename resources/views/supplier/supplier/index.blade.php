@@ -1,6 +1,7 @@
 <x-layouts.app title="Supplier">
     <x-page-header title="Supplier" subtitle="Pemasok beserta termin, lead time, dan performa pengiriman.">
         <x-slot:actions>
+            <x-export-buttons type="suppliers" />
             <a href="{{ route('suppliers.performance') }}" wire:navigate class="btn-secondary">
                 <x-icon name="chart" class="h-4 w-4" /> Performa
             </a>

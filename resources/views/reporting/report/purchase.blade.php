@@ -4,7 +4,12 @@
 
 <x-layouts.app title="Laporan Pembelian">
     <x-page-header title="Laporan Pembelian"
-                   subtitle="Invoice pembelian yang sudah diposting pada periode terpilih." />
+                   subtitle="Invoice pembelian yang sudah diposting pada periode terpilih.">
+        <x-slot:actions>
+            <x-export-buttons type="purchases" permission="report.purchase"
+                              :from="$from->toDateString()" :to="$to->toDateString()" />
+        </x-slot:actions>
+    </x-page-header>
 
     @include('reporting.partials.date-range')
 

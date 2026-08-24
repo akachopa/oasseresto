@@ -8,6 +8,8 @@ use App\Modules\Auth\Controllers\UserController;
 use App\Modules\Company\Controllers\BranchController;
 use App\Modules\Company\Controllers\CompanySettingController;
 use App\Modules\Company\Controllers\WarehouseController;
+use App\Modules\Core\Controllers\ExportController;
+use App\Modules\Core\Controllers\ImportController;
 use App\Modules\Core\Controllers\TaxCodeController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +51,16 @@ Route::prefix('pengaturan')->name('settings.')->group(function (): void {
         });
     });
 });
+
+Route::middleware('permission:setting.import')->prefix('pengaturan/import')->name('settings.import.')->group(function (): void {
+    Route::get('/', [ImportController::class, 'index'])->name('index');
+    Route::post('data', [ImportController::class, 'data'])->name('data');
+    Route::post('/', [ImportController::class, 'store'])->name('store');
+    Route::get('template/{type}', [ImportController::class, 'template'])->name('template');
+    Route::get('{importJob}', [ImportController::class, 'detail'])->name('detail');
+});
+
+Route::get('/export/{type}/{format}', [ExportController::class, 'download'])->name('export.download');
 
 Route::prefix('tim')->name('team.')->group(function (): void {
     Route::middleware('permission:setting.user.manage')->prefix('user')->name('users.')->group(function (): void {

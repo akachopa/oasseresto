@@ -1,6 +1,7 @@
 <x-layouts.app title="Customer">
     <x-page-header title="Customer" subtitle="Data pelanggan beserta plafon kredit dan piutang berjalan.">
         <x-slot:actions>
+            <x-export-buttons type="customers" />
             @can('customer.create')
                 <a href="{{ route('customers.create') }}" wire:navigate class="btn-primary">
                     <x-icon name="plus" class="h-4 w-4" /> Tambah Customer

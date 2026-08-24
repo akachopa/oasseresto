@@ -1,6 +1,7 @@
 <x-layouts.app title="Produk">
     <x-page-header title="Produk" subtitle="Katalog barang, satuan, dan harga jual.">
         <x-slot:actions>
+            <x-export-buttons type="products" />
             @can('product.create')
                 <a href="{{ route('products.create') }}" wire:navigate class="btn-primary">
                     <x-icon name="plus" class="h-4 w-4" /> Tambah Produk

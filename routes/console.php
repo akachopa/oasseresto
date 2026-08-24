@@ -10,3 +10,5 @@ Artisan::command('inspire', function () {
 
 Schedule::command('oasse:aggregate-metrics')->dailyAt('00:15');
 Schedule::command('oasse:scan-alerts')->hourly();
+Schedule::command('oasse:refresh-overdue')->hourly();
+Schedule::command('horizon:snapshot')->everyFiveMinutes();
