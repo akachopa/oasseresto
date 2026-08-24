@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Modules\Core\Enums\DocumentStatus;
 use App\Modules\Core\Enums\PayableStatus;
 use App\Modules\Core\Enums\ReceivableStatus;
-use App\Modules\Customer\Models\Customer;
-use App\Modules\Delivery\Services\DeliveryService;
 use App\Modules\Finance\Models\CashTransaction;
 use App\Modules\Finance\Models\Payable;
 use App\Modules\Finance\Models\Receivable;
@@ -18,61 +16,6 @@ use App\Modules\Finance\Services\ReceiptService;
 use App\Modules\Purchase\Services\GoodsReceiptService;
 use App\Modules\Purchase\Services\PurchaseInvoiceService;
 use App\Modules\Purchase\Services\PurchaseOrderService;
-use App\Modules\Sales\Models\SalesInvoice;
-use App\Modules\Sales\Services\SalesInvoiceService;
-use App\Modules\Sales\Services\SalesOrderService;
-
-/**
- * Bangun satu piutang riil lewat alur penjualan supaya pengujian pelunasan
- * memakai data yang benar-benar terbentuk dari dokumen bisnis.
- *
- * @return array{receivable: Receivable, invoice: SalesInvoice, customer: Customer}
- */
-function buildReceivable(int $companyId, int $warehouseId, int $branchId, float $unitPrice = 20_000, float $quantity = 20): array
-{
-    ['product' => $product, 'pcs' => $pcs] = stockProduct($companyId);
-
-    receiveStock($product, $warehouseId, $quantity * 2, 10_000);
-
-    $customer = makeCustomer($companyId, ['payment_term' => 'net_30']);
-    $orders = app(SalesOrderService::class);
-    $deliveries = app(DeliveryService::class);
-    $invoices = app(SalesInvoiceService::class);
-
-    $order = $orders->save(null, [
-        'customer_id' => $customer->id,
-        'warehouse_id' => $warehouseId,
-        'order_date' => now()->toDateString(),
-    ], [
-        ['product_id' => $product->id, 'unit_id' => $pcs->id, 'quantity' => $quantity, 'unit_price' => $unitPrice],
-    ]);
-
-    $orders->submit($order);
-
-    $delivery = $deliveries->save(null, [
-        'sales_order_id' => $order->id,
-        'delivery_date' => now()->toDateString(),
-    ], $deliveries->draftItemsFromOrder($order->fresh()));
-
-    $deliveries->pick($delivery, []);
-    $deliveries->dispatch($delivery->fresh());
-
-    $invoice = $invoices->save(null, [
-        'customer_id' => $customer->id,
-        'sales_order_id' => $order->id,
-        'delivery_id' => $delivery->id,
-        'branch_id' => $branchId,
-        'invoice_date' => now()->toDateString(),
-    ], $invoices->draftItemsFromDelivery($delivery->fresh()));
-
-    $invoices->post($invoice);
-
-    return [
-        'receivable' => Receivable::where('document_id', $invoice->id)->firstOrFail(),
-        'invoice' => $invoice->fresh(),
-        'customer' => $customer->fresh(),
-    ];
-}
 
 it('melunasi piutang lewat penerimaan dan menambah saldo kas', function (): void {
     ['company' => $company, 'branch' => $branch, 'warehouse' => $warehouse] = $this->bootCompany();

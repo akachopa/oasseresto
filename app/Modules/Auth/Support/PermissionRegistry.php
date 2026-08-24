@@ -128,6 +128,7 @@ class PermissionRegistry
                     'expense.view' => 'Lihat biaya',
                     'expense.create' => 'Input biaya',
                     'expense.approve' => 'Setujui biaya',
+                    'expense.post' => 'Bayarkan biaya',
                 ],
             ],
             'accounting' => [

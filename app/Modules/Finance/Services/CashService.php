@@ -118,15 +118,14 @@ class CashService
     }
 
     /**
-     * Saldo per tanggal untuk laporan posisi kas.
+     * Saldo per tanggal untuk laporan posisi kas. Saldo awal ikut tercatat
+     * sebagai mutasi, jadi cukup menjumlahkan buku kas sampai tanggal itu.
      */
     public function balanceAt(CashAccount $account, Carbon $date): float
     {
-        $movement = (float) CashTransaction::where('cash_account_id', $account->getKey())
+        return round((float) CashTransaction::where('cash_account_id', $account->getKey())
             ->whereDate('transaction_date', '<=', $date->toDateString())
             ->selectRaw("COALESCE(SUM(CASE WHEN direction = 'in' THEN amount ELSE -amount END), 0) as total")
-            ->value('total');
-
-        return round($account->opening_balance + $movement, 4);
+            ->value('total'), 4);
     }
 }
